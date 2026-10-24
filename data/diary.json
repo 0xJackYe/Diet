@@ -1,0 +1,680 @@
+{
+  "schemaVersion": 1,
+  "timezone": "Asia/Shanghai",
+  "updatedAt": "2026-10-24T20:49:16.057Z",
+  "description": "只归档用户实际提到的饮食；未确认吃完的餐食保留为计划。营养值按食材参考粗估。",
+  "days": [
+    {
+      "date": "2026-10-23",
+      "title": "燕麦碗与鸡胸肉沙拉",
+      "note": "早餐和午餐已吃；第三餐燕麦碗为计划，尚未确认。燕麦100g暂按干重计算，若实际为熟重需修正。鸡胸肉用户报150–200g，取175g并暂按熟重；沙拉与调味量为估算。日期已由用户确认。",
+      "source": {
+        "label": "用户分享对话",
+        "url": "https://chatgpt.com/share/6add1657-97b8-83ec-851d-d51b066fd4be",
+        "messageTimes": [
+          "2026-10-23T00:57:36+08:00",
+          "2026-10-23T01:01:12+08:00"
+        ],
+        "dateConfirmed": true,
+        "excerpts": [
+          "早餐吃了燕麦牛奶碗，燕麦坚果、一根香蕉、牛奶、一点草莓和蓝莓，另加两个鸡蛋。",
+          "午餐两片鸡胸肉，大概150到200克；一片黑面包加一片芝士，拌橄榄油和意大利黑醋的蔬菜沙拉。",
+          "第三餐想再吃一份燕麦碗；每份大约燕麦100g、坚果30g、全脂牛奶250ml。"
+        ]
+      },
+      "meals": [
+        {
+          "id": "2026-10-23-breakfast",
+          "type": "breakfast",
+          "status": "eaten",
+          "title": "燕麦水果坚果牛奶碗 · 鸡蛋",
+          "note": "燕麦、坚果、牛奶份量来自后续补充。",
+          "items": [
+            {
+              "id": "oats-dry",
+              "foodId": "oats-dry",
+              "name": "燕麦",
+              "amount": 100,
+              "unit": "g",
+              "basis": "暂按干重",
+              "estimatedPortion": false,
+              "nutrition": {
+                "kcal": 379,
+                "protein": 13.15,
+                "carbs": 67.7,
+                "fat": 6.52,
+                "fiber": 10.1,
+                "saturatedFat": 1.11
+              },
+              "note": "用户报100g；干重或泡好后的重量尚未确认，暂按干燕麦估算。"
+            },
+            {
+              "id": "mixed-nuts",
+              "foodId": "mixed-nuts",
+              "name": "混合坚果",
+              "amount": 30,
+              "unit": "g",
+              "basis": "可食部",
+              "estimatedPortion": false,
+              "nutrition": {
+                "kcal": 182.1,
+                "protein": 5.85,
+                "carbs": 6.73,
+                "fat": 16.05,
+                "fiber": 1.92,
+                "saturatedFat": 2.4
+              },
+              "note": "用户报30g；具体坚果配方与品牌未知。"
+            },
+            {
+              "id": "milk-whole",
+              "foodId": "milk-whole",
+              "name": "全脂牛奶",
+              "amount": 250,
+              "unit": "ml",
+              "basis": "体积",
+              "estimatedPortion": false,
+              "nutrition": {
+                "kcal": 152.5,
+                "protein": 7.88,
+                "carbs": 11.95,
+                "fat": 8.18,
+                "fiber": 0,
+                "saturatedFat": 4.66
+              },
+              "note": "用户报250ml；按1ml≈1g粗估。"
+            },
+            {
+              "id": "banana",
+              "foodId": "banana",
+              "name": "香蕉 1根",
+              "amount": 118,
+              "unit": "g",
+              "basis": "去皮可食部",
+              "estimatedPortion": true,
+              "nutrition": {
+                "kcal": 105.02,
+                "protein": 1.29,
+                "carbs": 26.95,
+                "fat": 0.39,
+                "fiber": 3.07,
+                "saturatedFat": 0.13
+              },
+              "note": "用户报1根；以中等香蕉可食部约118g估算。"
+            },
+            {
+              "id": "strawberries",
+              "foodId": "strawberries",
+              "name": "草莓",
+              "amount": 30,
+              "unit": "g",
+              "basis": "去蒂可食部",
+              "estimatedPortion": true,
+              "nutrition": {
+                "kcal": 9.6,
+                "protein": 0.2,
+                "carbs": 2.3,
+                "fat": 0.09,
+                "fiber": 0.6,
+                "saturatedFat": 0
+              },
+              "note": "用户说“少量”；暂按30g估算。"
+            },
+            {
+              "id": "blueberries",
+              "foodId": "blueberries",
+              "name": "蓝莓",
+              "amount": 30,
+              "unit": "g",
+              "basis": "可食部",
+              "estimatedPortion": true,
+              "nutrition": {
+                "kcal": 17.1,
+                "protein": 0.22,
+                "carbs": 4.35,
+                "fat": 0.1,
+                "fiber": 0.72,
+                "saturatedFat": 0.01
+              },
+              "note": "用户说“少量”；暂按30g估算。"
+            },
+            {
+              "id": "egg-boiled",
+              "foodId": "egg-boiled",
+              "name": "鸡蛋 2个",
+              "amount": 100,
+              "unit": "g",
+              "basis": "去壳可食部",
+              "estimatedPortion": true,
+              "nutrition": {
+                "kcal": 155,
+                "protein": 12.58,
+                "carbs": 1.12,
+                "fat": 10.61,
+                "fiber": 0,
+                "saturatedFat": 3.27
+              },
+              "note": "用户报2个；每枚可食部暂按50g，做法以水煮蛋近似，额外用油未计。"
+            }
+          ]
+        },
+        {
+          "id": "2026-10-23-lunch",
+          "type": "lunch",
+          "status": "eaten",
+          "title": "鸡胸肉 · 黑面包芝士 · 蔬菜沙拉",
+          "note": "烹调方式及其他用油未提供；此处只计已提到的橄榄油。",
+          "items": [
+            {
+              "id": "chicken-breast-cooked",
+              "foodId": "chicken-breast-cooked",
+              "name": "鸡胸肉",
+              "amount": 175,
+              "unit": "g",
+              "basis": "暂按熟重",
+              "estimatedPortion": true,
+              "nutrition": {
+                "kcal": 288.75,
+                "protein": 54.29,
+                "carbs": 0,
+                "fat": 6.25,
+                "fiber": 0,
+                "saturatedFat": 1.77
+              },
+              "note": "用户报150–200g，取中间值175g；生熟重未确认。"
+            },
+            {
+              "id": "black-bread",
+              "foodId": "black-bread",
+              "name": "黑面包 1片",
+              "amount": 40,
+              "unit": "g",
+              "basis": "即食重量",
+              "estimatedPortion": true,
+              "nutrition": {
+                "kcal": 100,
+                "protein": 3.48,
+                "carbs": 19,
+                "fat": 1.24,
+                "fiber": 2.6,
+                "saturatedFat": 0.17
+              },
+              "note": "用户报1片；暂按40g，以pumpernickel近似，品牌未知。"
+            },
+            {
+              "id": "cheese-slice",
+              "foodId": "cheese-slice",
+              "name": "芝士 1片",
+              "amount": 20,
+              "unit": "g",
+              "basis": "即食重量",
+              "estimatedPortion": true,
+              "nutrition": {
+                "kcal": 74.2,
+                "protein": 3.63,
+                "carbs": 0.74,
+                "fat": 6.36,
+                "fiber": 0,
+                "saturatedFat": 3.61
+              },
+              "note": "用户报1片；暂按20g，以美式再制干酪近似，品牌未知。"
+            },
+            {
+              "id": "lettuce",
+              "foodId": "lettuce",
+              "name": "蔬菜沙拉",
+              "amount": 200,
+              "unit": "g",
+              "basis": "生食可食部",
+              "estimatedPortion": true,
+              "nutrition": {
+                "kcal": 30,
+                "protein": 2.72,
+                "carbs": 5.74,
+                "fat": 0.3,
+                "fiber": 2.6,
+                "saturatedFat": 0.04
+              },
+              "note": "用户未报配菜和克重；以200g生菜近似，不代表确认为单一生菜。"
+            },
+            {
+              "id": "olive-oil",
+              "foodId": "olive-oil",
+              "name": "橄榄油",
+              "amount": 10,
+              "unit": "g",
+              "basis": "实际摄入量估算",
+              "estimatedPortion": true,
+              "nutrition": {
+                "kcal": 88.4,
+                "protein": 0,
+                "carbs": 0,
+                "fat": 10,
+                "fiber": 0,
+                "saturatedFat": 1.38
+              },
+              "note": "用户提到沙拉含橄榄油，未报份量；暂按10g。"
+            },
+            {
+              "id": "balsamic-vinegar",
+              "foodId": "balsamic-vinegar",
+              "name": "意大利黑醋",
+              "amount": 15,
+              "unit": "g",
+              "basis": "重量估算",
+              "estimatedPortion": true,
+              "nutrition": {
+                "kcal": 13.2,
+                "protein": 0.07,
+                "carbs": 2.55,
+                "fat": 0,
+                "fiber": null,
+                "saturatedFat": 0
+              },
+              "note": "用户提到黑醋，未报份量；暂按15g。"
+            }
+          ]
+        },
+        {
+          "id": "2026-10-23-dinner",
+          "type": "dinner",
+          "status": "planned",
+          "title": "再来一碗燕麦水果牛奶碗",
+          "note": "原话为“想吃第三餐”，暂未确认实际吃完；不计入已吃总量。",
+          "items": [
+            {
+              "id": "oats-dry",
+              "foodId": "oats-dry",
+              "name": "燕麦",
+              "amount": 100,
+              "unit": "g",
+              "basis": "暂按干重",
+              "estimatedPortion": false,
+              "nutrition": {
+                "kcal": 379,
+                "protein": 13.15,
+                "carbs": 67.7,
+                "fat": 6.52,
+                "fiber": 10.1,
+                "saturatedFat": 1.11
+              },
+              "note": "用户报100g；干重或泡好后的重量尚未确认，暂按干燕麦估算。"
+            },
+            {
+              "id": "mixed-nuts",
+              "foodId": "mixed-nuts",
+              "name": "混合坚果",
+              "amount": 30,
+              "unit": "g",
+              "basis": "可食部",
+              "estimatedPortion": false,
+              "nutrition": {
+                "kcal": 182.1,
+                "protein": 5.85,
+                "carbs": 6.73,
+                "fat": 16.05,
+                "fiber": 1.92,
+                "saturatedFat": 2.4
+              },
+              "note": "用户报30g；具体坚果配方与品牌未知。"
+            },
+            {
+              "id": "milk-whole",
+              "foodId": "milk-whole",
+              "name": "全脂牛奶",
+              "amount": 250,
+              "unit": "ml",
+              "basis": "体积",
+              "estimatedPortion": false,
+              "nutrition": {
+                "kcal": 152.5,
+                "protein": 7.88,
+                "carbs": 11.95,
+                "fat": 8.18,
+                "fiber": 0,
+                "saturatedFat": 4.66
+              },
+              "note": "用户报250ml；按1ml≈1g粗估。"
+            },
+            {
+              "id": "banana",
+              "foodId": "banana",
+              "name": "香蕉 1根",
+              "amount": 118,
+              "unit": "g",
+              "basis": "去皮可食部",
+              "estimatedPortion": true,
+              "nutrition": {
+                "kcal": 105.02,
+                "protein": 1.29,
+                "carbs": 26.95,
+                "fat": 0.39,
+                "fiber": 3.07,
+                "saturatedFat": 0.13
+              },
+              "note": "用户报1根；以中等香蕉可食部约118g估算。"
+            },
+            {
+              "id": "strawberries",
+              "foodId": "strawberries",
+              "name": "草莓",
+              "amount": 30,
+              "unit": "g",
+              "basis": "去蒂可食部",
+              "estimatedPortion": true,
+              "nutrition": {
+                "kcal": 9.6,
+                "protein": 0.2,
+                "carbs": 2.3,
+                "fat": 0.09,
+                "fiber": 0.6,
+                "saturatedFat": 0
+              },
+              "note": "用户说“少量”；暂按30g估算。"
+            },
+            {
+              "id": "blueberries",
+              "foodId": "blueberries",
+              "name": "蓝莓",
+              "amount": 30,
+              "unit": "g",
+              "basis": "可食部",
+              "estimatedPortion": true,
+              "nutrition": {
+                "kcal": 17.1,
+                "protein": 0.22,
+                "carbs": 4.35,
+                "fat": 0.1,
+                "fiber": 0.72,
+                "saturatedFat": 0.01
+              },
+              "note": "用户说“少量”；暂按30g估算。"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "date": "2026-10-25",
+      "title": "熟悉的早餐，一份草饲眼肉",
+      "note": "早餐沿用前次燕麦碗配方，另加两个鸡蛋。午餐牛排已补充为阿根廷草饲眼肉约250g生重；未计未提供的煎制油。辛拉面、干香菇、豆芽为晚餐计划，尚未确认吃完。日期已由用户确认。",
+      "source": {
+        "label": "用户分享对话",
+        "url": "https://chatgpt.com/share/6add1657-97b8-83ec-851d-d51b066fd4be",
+        "messageTimes": [
+          "2026-10-25T00:46:35+08:00",
+          "2026-10-25T01:55:01+08:00"
+        ],
+        "dateConfirmed": true,
+        "excerpts": [
+          "早上吃燕麦粥，配方和之前一样，加两个鸡蛋。午餐一片牛排，一片黑面包加芝士。",
+          "晚餐准备煮一碗辛拉面，加干香菇和豆芽。",
+          "牛排是阿根廷草饲眼肉，大概250克，生重。"
+        ]
+      },
+      "meals": [
+        {
+          "id": "2026-10-25-breakfast",
+          "type": "breakfast",
+          "status": "eaten",
+          "title": "燕麦水果坚果牛奶碗 · 鸡蛋",
+          "note": "用户说明配方与之前相同；燕麦100g仍暂按干重计算。",
+          "items": [
+            {
+              "id": "oats-dry",
+              "foodId": "oats-dry",
+              "name": "燕麦",
+              "amount": 100,
+              "unit": "g",
+              "basis": "暂按干重",
+              "estimatedPortion": false,
+              "nutrition": {
+                "kcal": 379,
+                "protein": 13.15,
+                "carbs": 67.7,
+                "fat": 6.52,
+                "fiber": 10.1,
+                "saturatedFat": 1.11
+              },
+              "note": "用户报100g；干重或泡好后的重量尚未确认，暂按干燕麦估算。"
+            },
+            {
+              "id": "mixed-nuts",
+              "foodId": "mixed-nuts",
+              "name": "混合坚果",
+              "amount": 30,
+              "unit": "g",
+              "basis": "可食部",
+              "estimatedPortion": false,
+              "nutrition": {
+                "kcal": 182.1,
+                "protein": 5.85,
+                "carbs": 6.73,
+                "fat": 16.05,
+                "fiber": 1.92,
+                "saturatedFat": 2.4
+              },
+              "note": "用户报30g；具体坚果配方与品牌未知。"
+            },
+            {
+              "id": "milk-whole",
+              "foodId": "milk-whole",
+              "name": "全脂牛奶",
+              "amount": 250,
+              "unit": "ml",
+              "basis": "体积",
+              "estimatedPortion": false,
+              "nutrition": {
+                "kcal": 152.5,
+                "protein": 7.88,
+                "carbs": 11.95,
+                "fat": 8.18,
+                "fiber": 0,
+                "saturatedFat": 4.66
+              },
+              "note": "用户报250ml；按1ml≈1g粗估。"
+            },
+            {
+              "id": "banana",
+              "foodId": "banana",
+              "name": "香蕉 1根",
+              "amount": 118,
+              "unit": "g",
+              "basis": "去皮可食部",
+              "estimatedPortion": true,
+              "nutrition": {
+                "kcal": 105.02,
+                "protein": 1.29,
+                "carbs": 26.95,
+                "fat": 0.39,
+                "fiber": 3.07,
+                "saturatedFat": 0.13
+              },
+              "note": "用户报1根；以中等香蕉可食部约118g估算。"
+            },
+            {
+              "id": "strawberries",
+              "foodId": "strawberries",
+              "name": "草莓",
+              "amount": 30,
+              "unit": "g",
+              "basis": "去蒂可食部",
+              "estimatedPortion": true,
+              "nutrition": {
+                "kcal": 9.6,
+                "protein": 0.2,
+                "carbs": 2.3,
+                "fat": 0.09,
+                "fiber": 0.6,
+                "saturatedFat": 0
+              },
+              "note": "用户说“少量”；暂按30g估算。"
+            },
+            {
+              "id": "blueberries",
+              "foodId": "blueberries",
+              "name": "蓝莓",
+              "amount": 30,
+              "unit": "g",
+              "basis": "可食部",
+              "estimatedPortion": true,
+              "nutrition": {
+                "kcal": 17.1,
+                "protein": 0.22,
+                "carbs": 4.35,
+                "fat": 0.1,
+                "fiber": 0.72,
+                "saturatedFat": 0.01
+              },
+              "note": "用户说“少量”；暂按30g估算。"
+            },
+            {
+              "id": "egg-boiled",
+              "foodId": "egg-boiled",
+              "name": "鸡蛋 2个",
+              "amount": 100,
+              "unit": "g",
+              "basis": "去壳可食部",
+              "estimatedPortion": true,
+              "nutrition": {
+                "kcal": 155,
+                "protein": 12.58,
+                "carbs": 1.12,
+                "fat": 10.61,
+                "fiber": 0,
+                "saturatedFat": 3.27
+              },
+              "note": "用户报2个；每枚可食部暂按50g，做法以水煮蛋近似，额外用油未计。"
+            }
+          ]
+        },
+        {
+          "id": "2026-10-25-lunch",
+          "type": "lunch",
+          "status": "eaten",
+          "title": "阿根廷草饲眼肉 · 黑面包芝士",
+          "note": "以USDA澳洲草饲含脂眼肉近似，产地、修脂及煎后脂肪损失会影响估算。",
+          "items": [
+            {
+              "id": "ribeye-raw",
+              "foodId": "ribeye-raw",
+              "name": "阿根廷草饲眼肉牛排",
+              "amount": 250,
+              "unit": "g",
+              "basis": "生重",
+              "estimatedPortion": false,
+              "nutrition": {
+                "kcal": 542.5,
+                "protein": 49.5,
+                "carbs": 0.28,
+                "fat": 38.03,
+                "fiber": 0,
+                "saturatedFat": 16.96
+              },
+              "note": "用户已确认约250g生重；不包含额外煎制油。"
+            },
+            {
+              "id": "black-bread",
+              "foodId": "black-bread",
+              "name": "黑面包 1片",
+              "amount": 40,
+              "unit": "g",
+              "basis": "即食重量",
+              "estimatedPortion": true,
+              "nutrition": {
+                "kcal": 100,
+                "protein": 3.48,
+                "carbs": 19,
+                "fat": 1.24,
+                "fiber": 2.6,
+                "saturatedFat": 0.17
+              },
+              "note": "用户报1片；暂按40g，以pumpernickel近似，品牌未知。"
+            },
+            {
+              "id": "cheese-slice",
+              "foodId": "cheese-slice",
+              "name": "芝士 1片",
+              "amount": 20,
+              "unit": "g",
+              "basis": "即食重量",
+              "estimatedPortion": true,
+              "nutrition": {
+                "kcal": 74.2,
+                "protein": 3.63,
+                "carbs": 0.74,
+                "fat": 6.36,
+                "fiber": 0,
+                "saturatedFat": 3.61
+              },
+              "note": "用户报1片；暂按20g，以美式再制干酪近似，品牌未知。"
+            }
+          ]
+        },
+        {
+          "id": "2026-10-25-dinner",
+          "type": "dinner",
+          "status": "planned",
+          "title": "辛拉面 · 干香菇 · 豆芽",
+          "note": "原话为“晚餐准备”，尚未确认实际吃完。包装版本、香菇和豆芽份量均待确认。",
+          "items": [
+            {
+              "id": "shin-ramyun",
+              "foodId": "shin-ramyun",
+              "name": "辛拉面 1包（暂估）",
+              "amount": 120,
+              "unit": "g",
+              "basis": "包装干重",
+              "estimatedPortion": true,
+              "nutrition": {
+                "kcal": 500,
+                "protein": 9.8,
+                "carbs": 81.5,
+                "fat": 15,
+                "fiber": null,
+                "saturatedFat": null
+              },
+              "note": "用户报一碗；暂按120g袋装日本版500kcal，实际以手中包装为准。"
+            },
+            {
+              "id": "shiitake-dried",
+              "foodId": "shiitake-dried",
+              "name": "干香菇",
+              "amount": 10,
+              "unit": "g",
+              "basis": "泡发前干重",
+              "estimatedPortion": true,
+              "nutrition": {
+                "kcal": 29.6,
+                "protein": 0.96,
+                "carbs": 7.54,
+                "fat": 0.1,
+                "fiber": 1.15,
+                "saturatedFat": 0.02
+              },
+              "note": "用户说“加点”；暂按干重10g。"
+            },
+            {
+              "id": "mung-bean-sprouts",
+              "foodId": "mung-bean-sprouts",
+              "name": "豆芽",
+              "amount": 100,
+              "unit": "g",
+              "basis": "烹调前生重",
+              "estimatedPortion": true,
+              "nutrition": {
+                "kcal": 30,
+                "protein": 3.04,
+                "carbs": 5.94,
+                "fat": 0.18,
+                "fiber": 1.8,
+                "saturatedFat": 0.05
+              },
+              "note": "份量及品种未提供；暂按100g绿豆芽参考。"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

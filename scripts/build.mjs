@@ -1,0 +1,11 @@
+import { cp, mkdir, rm } from 'node:fs/promises';
+import { fileURLToPath } from 'node:url';
+import { resolve, dirname, basename } from 'node:path';
+const root = fileURLToPath(new URL('../', import.meta.url));
+const output = resolve(root, 'dist');
+if (dirname(output) !== resolve(root) || basename(output) !== 'dist') throw new Error('Invalid build output path');
+await rm(output, { recursive: true, force: true });
+await mkdir(new URL('../dist/', import.meta.url), { recursive: true });
+await cp(root + 'site', root + 'dist', { recursive: true });
+await cp(root + 'data', root + 'dist/data', { recursive: true });
+console.log('Built static site → dist/');
