@@ -67,7 +67,7 @@ for (const day of diary.days) {
   assert.deepEqual(dayTotal(day), nutritionTotal(eatenItems), `${day.date} 的已吃总量包含了计划餐`);
 }
 
-for (const date of ['2026-10-23', '2026-10-25']) {
+for (const date of ['2026-10-23', '2026-10-24']) {
   const day = diary.days.find(entry => entry.date === date);
   assert.ok(day, `缺少真实归档日期 ${date}`);
   assert.equal(day.source?.dateConfirmed, true, `${date} 应保留用户确认的日期`);

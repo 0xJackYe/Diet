@@ -131,7 +131,7 @@ test('导入拒绝重复日期、餐食 ID 以及零或负份量', () => {
 });
 
 test('真实记录用 250g 生重草饲眼肉计算约 542.5kcal', () => {
-  const day = diary.days.find(item => item.date === '2026-10-25');
+  const day = diary.days.find(item => item.date === '2026-10-24');
   const lunch = day.meals.find(meal => meal.type === 'lunch');
   const ribeye = lunch.items.find(item => item.foodId === 'ribeye-raw');
   const reference = catalog.foods.find(food => food.id === 'ribeye-raw');
