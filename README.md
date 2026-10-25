@@ -27,7 +27,33 @@ npm test
 npm run build
 ```
 
-`dist/` 可放到支持静态文件的网站托管服务。所有资源使用相对路径，也可部署在 GitHub Pages 仓库路径下。`.github/workflows/pages.yml` 支持从 main 分支构建；在仓库 Settings → Pages 选择 GitHub Actions 后生效。GitHub Pages 的访问范围由 GitHub 仓库与 Pages 设置决定，和默认私有的 Sites 网站不同。
+构建生成 `dist/server/index.js`，它同时提供页面和自然语言解析接口，需要支持 Cloudflare Worker ESM 的服务端运行环境。Sites 已配置对应部署；GitHub Actions 运行检查、测试和构建。GitHub Pages 只能托管静态文件，无法运行本项目的 DeepSeek 服务端接口。
+
+## 口述一餐或一整天
+
+网站顶部的“说说这一餐”支持输入文字、手机键盘语音和浏览器直接口述。例如：
+
+> 今天早餐吃了两个鸡蛋和250毫升牛奶。
+
+> 昨天早餐吃了燕麦碗，中午吃了一碗米饭和鸡胸肉，晚餐准备吃番茄鸡蛋面。
+
+说完后可检查文字，再点“整理并记录”。DeepSeek 将文字拆成实际提到的餐次，成功后自动填到对应日期的早餐、午餐、晚餐或加餐卡片。同餐次已有食物时追加到原卡片，保留其他餐次；可编辑，也可撤销这次填入。没有说哪一餐时，可从下拉菜单选餐次。缺少必要信息会提示补充，失败会保留文字；重复点击和同次重试不会重复加餐。
+
+“今天、昨天”以北京时间当前日期换算；没有提日期时使用表单里的“吃饭的日期”。计划吃和实际吃过继续分开统计。份量未给时粗估并标注；已有食材使用参考库计算，其他食物使用 AI 粗估，不补造未提及的餐食。
+
+直接口述依赖浏览器的 `SpeechRecognition` / `webkitSpeechRecognition`、网络与麦克风权限，部分浏览器不支持；可随时改用手机键盘语音输入或打字。语音识别可能由浏览器的语音服务处理。页面不会上传音频给 DeepSeek；点整理时，服务端将口述文字、食材参考和必要的已知饮食配方发送给 DeepSeek。
+
+整理结果沿用网站原有的**本机草稿**保存方式，不会自动提交 GitHub。跨设备归档仍请导出日记，交给 Codex 合并发布。
+
+### API Key
+
+生产环境使用 Sites 的服务端秘密变量 `DEEPSEEK_API_KEY`；`DEEPSEEK_MODEL` 当前为 `deepseek-flash`。真实 Key 不写入源码、页面、浏览器存储或构建产物。`.env.example` 只列变量名称。本地可使用未跟踪的 `.env`（Node.js 22）：
+
+```sh
+node --env-file=.env scripts/serve.mjs
+```
+
+调用采用 [DeepSeek 官方 JSON 输出](https://api-docs.deepseek.com/guides/json_mode/)和[Chat Completions](https://api-docs.deepseek.com/api/create-chat-completion/)；服务端校验结构、日期、餐次、份量和营养数值，并处理账户、限流、超时和不完整输出。API 仅在现有本人访问范围内使用，不能把站点改成公开而不同时增加接口鉴权。
 
 ## 每天通过对话继续记录
 
@@ -63,10 +89,13 @@ npm run record -- --input path/to/day-or-diary.json
 data/diary.json          跨设备发布的真实饮食记录
 data/foods.json          带来源的食材参考库
 site/                   静态前端与共享计算/校验函数
+site/quick-entry.js      文字与浏览器语音入口
+site/quick-merge.mjs     按餐次合并、重复提交保护与撤销
+server/                 DeepSeek服务端解析和HTTP接口
 scripts/record-day.mjs   追加与更正记录
 scripts/check.mjs        数据一致性检查
 tests/                  统计、合并、校验测试
-.openai/hosting.json     Sites 部署身份与输出目录
+.openai/hosting.json     Sites 部署身份与Worker配置
 ```
 
 饮食数据随源码进入本仓库；仓库目前为用户指定的公开仓库。浏览器草稿仅留在本机，清除站点数据会失去未导出的草稿。

@@ -1,6 +1,6 @@
 {
   "name": "shiguang-diet-journal",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "private": true,
   "type": "module",
   "description": "食光：每天的食材、餐食与营养估算日记",

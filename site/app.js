@@ -1,4 +1,6 @@
 import { MEALS, NUTRIENTS, today, estimate, nutritionTotal, dayTotal, validateDiary, validateDay, mergeDays } from './lib.mjs';
+import { setupQuickEntry } from './quick-entry.js';
+import { applyParsedMeals, undoParsedMeals } from './quick-merge.mjs';
 
 const $ = s => document.querySelector(s);
 const esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
@@ -80,6 +82,27 @@ function renderFoods() {
 function saveDraft(day) {
   validateDay(day); drafts = mergeDays(drafts, [day]); persist(); render();
 }
+function commitQuickDrafts(next) {
+  validateDiary({ schemaVersion: 1, days: next });
+  try { localStorage.setItem(storageKey, JSON.stringify({ schemaVersion: 1, days: next })); }
+  catch { throw new Error('浏览器没有成功保存，请先导出日记释放空间后重试。口述文字仍保留在输入框。'); }
+  drafts = next;
+  days = mergeDays(canonical.days, drafts);
+}
+function applyQuickEntry(incoming) {
+  const result = applyParsedMeals(canonical.days, drafts, incoming);
+  if (!result.alreadyApplied) commitQuickDrafts(result.drafts);
+  selected = incoming.at(-1)?.date ?? selected;
+  $('#search-input').value = '';
+  switchView('diary');
+  return result.alreadyApplied ? null : result.undoToken;
+}
+function undoQuickEntry(token) {
+  const result = undoParsedMeals(canonical.days, drafts, token);
+  if (result.preservedCount) throw new Error('这次记录里有餐食后来被编辑过，已保留这些修改。请直接在对应卡片里调整。');
+  commitQuickDrafts(result.drafts);
+  render();
+}
 function openMeal(meal = null) {
   editing = meal;
   $('#meal-form').reset();
@@ -135,7 +158,7 @@ function saveMeal(event) {
       return { id: old?.id ?? `item-${crypto.randomUUID()}`, foodId: food?.id ?? null, name: get('.row-name').trim(), amount, unit: get('.row-unit'), basis: sameFood ? old.basis : food?.basis ?? '手动记录', estimatedPortion: sameQuantity ? old.estimatedPortion : true, nutrition: food ? estimate(food, amount) : { ...Object.fromEntries(NUTRIENTS.map(n => [n, null])), kcal: Number(get('.row-kcal')) }, note };
     });
     const confirmed = editing?.status === 'planned' && $('#entry-status').value === 'eaten';
-    const meal = { id: editing?.id ?? `meal-${crypto.randomUUID()}`, type: $('#entry-type').value, status: $('#entry-status').value, title: $('#entry-title').value.trim(), note: `${$('#entry-note').value.trim()}${confirmed ? '（后续已在网站确认吃过。）' : ''}`, modifiedAt: new Date().toISOString(), items };
+    const meal = { ...editing, id: editing?.id ?? `meal-${crypto.randomUUID()}`, type: $('#entry-type').value, status: $('#entry-status').value, title: $('#entry-title').value.trim(), note: `${$('#entry-note').value.trim()}${confirmed ? '（后续已在网站确认吃过。）' : ''}`, modifiedAt: new Date().toISOString(), items };
     const previous = days.find(d => d.date === date);
     saveDraft({ date, title: previous?.title ?? '认真吃饭的一天', note: `${previous?.note ?? ''}${confirmed ? ` 补充：${MEALS[meal.type]}已在网站确认为吃过。` : ''}`, source: previous?.source ?? { label: '网站手动记录' }, meals: [meal] });
     selected = date; render(); $('#meal-dialog').close(); toast('已保存到本机草稿。可导出备份；对话更新会进入仓库。');
@@ -198,6 +221,7 @@ async function init() {
     try { const saved = localStorage.getItem(storageKey); if (saved) drafts = validateDiary(JSON.parse(saved)).days; } catch { toast('已有本机草稿无法读取，请导出原备份后重新导入。'); }
     days = mergeDays(canonical.days, drafts); selected = days.at(-1)?.date ?? today();
     wire(); render();
+    setupQuickEntry({ apply: applyQuickEntry, undo: undoQuickEntry });
   } catch (error) { $('#meal-list').innerHTML = `<div class="empty-state"><h3>日记暂时没有打开</h3><p>${esc(error.message)}，请刷新重试。</p></div>`; }
 }
 init();
