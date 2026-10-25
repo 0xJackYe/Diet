@@ -9,7 +9,8 @@ const dateObj = d => new Date(d + 'T12:00:00+08:00');
 const dateLabel = d => dateObj(d).toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long', timeZone: 'Asia/Shanghai' });
 const shift = (d, n) => { const x = dateObj(d); x.setUTCDate(x.getUTCDate() + n); return x.toISOString().slice(0, 10); };
 const storageKey = 'shiguang-drafts-v1';
-let canonical, catalog, drafts = [], days = [], selected = today(), view = 'diary', editing = null;
+let canonical, catalog, drafts = [], days = [], selected = today(), view = 'diary', editing = null, editingDate = null;
+let calendarMonth = today().slice(0, 7), detailOpen = false, quickController;
 let toastTimer;
 function toast(message) { $('#toast').textContent = message; $('#toast').hidden = false; $('#toast').classList.add('show'); clearTimeout(toastTimer); toastTimer = setTimeout(() => { $('#toast').classList.remove('show'); $('#toast').hidden = true; }, 4500); }
 function persist() {
@@ -21,12 +22,39 @@ function selectedDay() { return days.find(d => d.date === selected); }
 function isDraft(id, date = selected) { return drafts.some(d => d.date === date && d.meals.some(m => m.id === id)); }
 function weekDates() { const dow = dateObj(selected).getUTCDay(); const monday = shift(selected, -(dow === 0 ? 6 : dow - 1)); return Array.from({ length: 7 }, (_, i) => shift(monday, i)); }
 function eatenDays(list) { return list.filter(d => d.meals.some(m => m.status === 'eaten')); }
-function setDate(date) { selected = date; render(); }
-function switchView(next) {
+function setDate(date) { selected = date; calendarMonth = date.slice(0, 7); detailOpen = true; render(); }
+function switchView(next, { history = true, replace = false } = {}) {
+  if (!['diary', 'trends', 'foods', 'record'].includes(next)) next = 'diary';
+  if (view === 'record' && next !== 'record') quickController?.cancel();
   view = next;
-  for (const v of ['diary', 'trends', 'foods']) $(`#view-${v}`).hidden = v !== view;
+  for (const v of ['diary', 'trends', 'foods', 'record']) $(`#view-${v}`).hidden = v !== view;
+  document.body.classList.toggle('is-record-view', view === 'record');
+  document.querySelector('.hero').hidden = view === 'record';
+  if (history && location.hash !== `#${next}`) window.history[replace ? 'replaceState' : 'pushState']({ view: next }, '', `#${next}`);
   document.querySelectorAll('[data-view]').forEach(b => { b.classList.toggle('active', b.dataset.view === view); if (b.dataset.view === view) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current'); });
   render();
+}
+function setRecordMethod(method) {
+  for (const mode of ['natural', 'form']) {
+    $(`#record-${mode}-panel`).hidden = mode !== method;
+    const button = $(`#record-method-${mode}`);
+    button.classList.toggle('active', mode === method);
+    button.setAttribute('aria-selected', String(mode === method));
+    button.tabIndex = mode === method ? 0 : -1;
+  }
+}
+function openRecord(method = 'natural') {
+  prepareMealForm();
+  const recordDate = detailOpen ? selected : today();
+  $('#entry-date').value = recordDate;
+  if (!$('#quick-text').value.trim()) {
+    $('#quick-date').value = recordDate;
+    $('#quick-date').dispatchEvent(new Event('input', { bubbles: true }));
+  }
+  setRecordMethod(method);
+  switchView('record');
+  $('#record-back').focus({ preventScroll: true });
+  window.scrollTo({ top: 0, behavior: 'auto' });
 }
 function statsMarkup(day) {
   const total = dayTotal(day), planned = dayTotal(day, 'planned');
@@ -54,12 +82,13 @@ function render() {
   const day = selectedDay();
   $('#selected-date-title').textContent = dateLabel(selected);
   $('#selected-date-subtitle').textContent = day?.title || '每一餐，都值得好好记录';
-  $('#week-strip').innerHTML = weekDates().map(date => `<button class="day-chip ${date === selected ? 'is-selected' : ''} ${days.some(d => d.date === date && d.meals.length) ? 'has-record' : ''}" data-date="${date}" aria-pressed="${date === selected}" aria-label="${date}"><span class="weekday">周${['日', '一', '二', '三', '四', '五', '六'][dateObj(date).getUTCDay()]}</span><span class="day-number">${Number(date.slice(-2))}</span><span class="day-dot"></span></button>`).join('');
+  renderCalendar();
+  $('#day-detail').hidden = !detailOpen;
   $('#daily-stats').innerHTML = statsMarkup(day);
   const query = $('#search-input').value.trim().toLowerCase();
   const order = Object.keys(MEALS);
   const matched = (day?.meals.filter(m => `${m.title} ${m.note ?? ''} ${m.items.map(i => i.name).join(' ')}`.toLowerCase().includes(query)) ?? []).sort((a, b) => order.indexOf(a.type) - order.indexOf(b.type));
-  $('#meal-list').innerHTML = matched.length ? matched.map(mealMarkup).join('') : `<div class="empty-state"><span>◡</span><h3>${query ? '没有找到这道食物' : '这一天，等你落笔'}</h3><p>${query ? '试试其他食材名称。' : '没有记录的日期会留白。点击“记录一餐”，写下你的下一顿。'}</p>${query ? '' : '<button class="primary-button" data-new-meal>＋ 记录一餐</button>'}</div>`;
+  $('#meal-list').innerHTML = matched.length ? matched.map(mealMarkup).join('') : `<div class="empty-state"><span>◡</span><h3>${query ? '没有找到这道食物' : '这一天还没有记录'}</h3><p>${query ? '试试其他食材名称。' : '记录吃过的一餐，食材和估算会出现在这里。'}</p>${query ? '' : '<button class="button button-primary" data-new-meal>＋ 记录饮食</button>'}</div>`;
   $('#day-note').textContent = day?.note || '今天吃了什么、用了多少份量，都可以在下一次对话里告诉我。';
   const total = day?.meals.some(m => m.status === 'eaten') ? dayTotal(day) : Object.fromEntries(NUTRIENTS.map(n => [n, null])), energy = total.kcal || 1;
   $('#daily-macros').innerHTML = [['蛋白质', total.protein, 4, 'protein'], ['碳水化合物', total.carbs, 4, 'carbs'], ['脂肪', total.fat, 9, 'fat']].map(([label, n, factor, cls]) => `<div class="macro-row"><span class="macro-label">${label}</span><span class="macro-track"><span class="${cls}" style="width:${Math.min(100, (n || 0) * factor / energy * 100)}%"></span></span><span class="macro-value">${fmt(n, 1)}g</span></div>`).join('') + `<div class="nutrition-extra"><span>膳食纤维 <strong>${fmt(total.fiber, 1)}g</strong></span><span>饱和脂肪 <strong>${fmt(total.saturatedFat, 1)}g</strong></span></div><p class="source-note">色条为估算供能占比；“—”表示数据不完整。</p>`;
@@ -93,8 +122,10 @@ function applyQuickEntry(incoming) {
   const result = applyParsedMeals(canonical.days, drafts, incoming);
   if (!result.alreadyApplied) commitQuickDrafts(result.drafts);
   selected = incoming.at(-1)?.date ?? selected;
+  calendarMonth = selected.slice(0, 7); detailOpen = true;
   $('#search-input').value = '';
-  switchView('diary');
+  $('#record-view-day').hidden = false;
+  render();
   return result.alreadyApplied ? null : result.undoToken;
 }
 function undoQuickEntry(token) {
@@ -103,8 +134,9 @@ function undoQuickEntry(token) {
   commitQuickDrafts(result.drafts);
   render();
 }
-function openMeal(meal = null) {
+function prepareMealForm(meal = null) {
   editing = meal;
+  editingDate = meal ? selected : null;
   $('#meal-form').reset();
   $('#entry-date').value = selected;
   $('#entry-date').readOnly = !!meal;
@@ -114,7 +146,14 @@ function openMeal(meal = null) {
   $('#entry-note').value = meal?.note ?? '';
   $('#food-rows').replaceChildren();
   (meal?.items ?? [null]).forEach(addFoodRow);
-  $('#meal-dialog').showModal();
+  $('#meal-dialog-title').textContent = meal ? '编辑这顿饭' : '填写餐食';
+}
+function openMeal(meal = null) {
+  prepareMealForm(meal);
+  setRecordMethod('form');
+  switchView('record');
+  $('#entry-title').focus({ preventScroll: true });
+  window.scrollTo({ top: 0, behavior: 'auto' });
 }
 function addFoodRow(item = null) {
   const row = document.createElement('div'); row.className = 'food-row';
@@ -145,7 +184,9 @@ function saveMeal(event) {
   event.preventDefault();
   try {
     const date = $('#entry-date').value;
-    if (editing && date !== selected) { toast('编辑餐食时保留原日期；其他日期请新增餐食。'); return; }
+    if (editing && date !== editingDate) { toast('编辑餐食时保留原日期；其他日期请新增餐食。'); return; }
+    const latestMeal = editing && days.find(day => day.date === editingDate)?.meals.find(meal => meal.id === editing.id);
+    if (editing && JSON.stringify(latestMeal) !== JSON.stringify(editing)) { toast('这餐已更新，请返回日历重新打开编辑，以保留最新食材。'); return; }
     const items = [...$('#food-rows').children].map((row, i) => {
       const get = s => row.querySelector(s).value;
       const food = catalog.foods.find(f => f.id === get('.row-food'));
@@ -161,15 +202,37 @@ function saveMeal(event) {
     const meal = { ...editing, id: editing?.id ?? `meal-${crypto.randomUUID()}`, type: $('#entry-type').value, status: $('#entry-status').value, title: $('#entry-title').value.trim(), note: `${$('#entry-note').value.trim()}${confirmed ? '（后续已在网站确认吃过。）' : ''}`, modifiedAt: new Date().toISOString(), items };
     const previous = days.find(d => d.date === date);
     saveDraft({ date, title: previous?.title ?? '认真吃饭的一天', note: `${previous?.note ?? ''}${confirmed ? ` 补充：${MEALS[meal.type]}已在网站确认为吃过。` : ''}`, source: previous?.source ?? { label: '网站手动记录' }, meals: [meal] });
-    selected = date; render(); $('#meal-dialog').close(); toast('已保存到本机草稿。可导出备份；对话更新会进入仓库。');
+    selected = date; calendarMonth = date.slice(0, 7); detailOpen = true;
+    switchView('diary', { replace: true }); showDayDetail(); toast('已保存到本机草稿。');
   } catch (error) { toast(error.message); }
 }
 function renderCalendar() {
-  const month = $('#calendar-month').value;
+  const month = calendarMonth;
+  $('#calendar-month').value = month;
   if (!/^\d{4}-\d{2}$/.test(month)) return;
   const first = month + '-01', count = Number(shift(shift(first, 32).slice(0, 7) + '-01', -1).slice(-2));
   const pad = (dateObj(first).getUTCDay() + 6) % 7;
-  $('#calendar-grid').innerHTML = ['一', '二', '三', '四', '五', '六', '日'].map(x => `<span class="calendar-weekday">${x}</span>`).join('') + '<span class="calendar-pad"></span>'.repeat(pad) + Array.from({ length: count }, (_, i) => { const date = `${month}-${String(i + 1).padStart(2, '0')}`; return `<button class="calendar-day ${date === selected ? 'is-selected' : ''} ${days.some(d => d.date === date && d.meals.length) ? 'has-record' : ''}" data-calendar-date="${date}" aria-label="${date}${days.some(d => d.date === date) ? ' 有记录' : ''}">${i + 1}</button>`; }).join('');
+  $('#calendar-grid').innerHTML = ['一', '二', '三', '四', '五', '六', '日'].map(x => `<span class="month-weekday">周${x}</span>`).join('') + '<span class="month-pad" aria-hidden="true"></span>'.repeat(pad) + Array.from({ length: count }, (_, i) => {
+    const date = `${month}-${String(i + 1).padStart(2, '0')}`;
+    const day = days.find(d => d.date === date);
+    const eaten = day?.meals.filter(m => m.status === 'eaten').length ?? 0;
+    const planned = day?.meals.filter(m => m.status === 'planned').length ?? 0;
+    const active = detailOpen && date === selected;
+    const description = [eaten ? `${eaten}餐已吃` : '', planned ? `${planned}餐计划` : ''].filter(Boolean).join('，') || '未记录';
+    return `<button type="button" class="month-day ${active ? 'is-selected' : ''} ${eaten || planned ? 'has-record' : ''} ${date === today() ? 'is-today' : ''}" data-calendar-date="${date}" aria-controls="day-detail" aria-expanded="${active}" aria-label="${date} ${description}"><span class="month-day-number">${i + 1}</span><span class="month-day-meta">${eaten ? `${eaten}餐已吃` : planned ? `${planned}餐计划` : ''}</span></button>`;
+  }).join('');
+}
+function changeMonth(offset) {
+  const date = dateObj(calendarMonth + '-01');
+  date.setUTCMonth(date.getUTCMonth() + offset);
+  const next = date.toISOString().slice(0, 7);
+  if (!/^\d{4}-\d{2}$/.test(next)) return;
+  calendarMonth = next; detailOpen = false; render();
+}
+function showDayDetail() {
+  $('#selected-date-title').setAttribute('tabindex', '-1');
+  $('#selected-date-title').focus({ preventScroll: true });
+  $('#day-detail').scrollIntoView({ block: 'start' });
 }
 function exportDiary() {
   const payload = { ...canonical, updatedAt: new Date().toISOString(), days };
@@ -181,7 +244,7 @@ async function importDiary(event) {
   try {
     if (file.size > 10 * 1024 * 1024) throw new Error('请导入 10MB 以内的日记文件。');
     const incoming = validateDiary(JSON.parse(await file.text()));
-    drafts = mergeDays(drafts, incoming.days); persist(); selected = days.at(-1)?.date ?? today(); render(); toast(`已合并 ${incoming.days.length} 天到本机草稿，同 ID 餐食更新，其余保留。`);
+    drafts = mergeDays(drafts, incoming.days); persist(); setDate(days.at(-1)?.date ?? today()); switchView('diary'); toast(`已合并 ${incoming.days.length} 天到本机草稿，同 ID 餐食更新，其余保留。`);
   } catch (error) { toast(`导入未完成：${error.message}`); }
   event.target.value = '';
 }
@@ -189,22 +252,34 @@ function wire() {
   document.querySelectorAll('[data-view]').forEach(b => b.addEventListener('click', () => switchView(b.dataset.view)));
   $('#today-button').addEventListener('click', () => { switchView('diary'); setDate(today()); });
   $('#search-input').addEventListener('input', render);
-  $('#add-meal-button').addEventListener('click', () => openMeal());
+  $('#add-meal-button').addEventListener('click', () => openRecord());
   $('#add-food-row').addEventListener('click', () => addFoodRow());
   $('#meal-form').addEventListener('submit', saveMeal);
-  $('#cancel-meal').addEventListener('click', () => $('#meal-dialog').close());
-  $('#close-meal-dialog').addEventListener('click', () => $('#meal-dialog').close());
-  $('#calendar-button').addEventListener('click', () => { $('#calendar-month').value = selected.slice(0, 7); renderCalendar(); $('#calendar-dialog').showModal(); });
-  $('#calendar-month').addEventListener('change', renderCalendar);
-  $('#close-calendar-dialog').addEventListener('click', () => $('#calendar-dialog').close());
+  $('#cancel-meal').addEventListener('click', () => switchView('diary', { replace: true }));
+  $('#record-back').addEventListener('click', () => switchView('diary', { replace: true }));
+  $('#record-view-day').addEventListener('click', () => { switchView('diary', { replace: true }); showDayDetail(); });
+  document.querySelectorAll('[data-record-method]').forEach(button => {
+    button.addEventListener('click', () => setRecordMethod(button.dataset.recordMethod));
+    button.addEventListener('keydown', event => {
+      if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return;
+      event.preventDefault();
+      const method = event.key === 'Home' ? 'natural' : event.key === 'End' ? 'form' : button.dataset.recordMethod === 'natural' ? 'form' : 'natural';
+      setRecordMethod(method); $(`#record-method-${method}`).focus();
+    });
+  });
+  $('#calendar-prev').addEventListener('click', () => changeMonth(-1));
+  $('#calendar-next').addEventListener('click', () => changeMonth(1));
+  $('#calendar-month').addEventListener('change', event => { if (/^\d{4}-\d{2}$/.test(event.target.value)) { calendarMonth = event.target.value; detailOpen = false; render(); } else event.target.value = calendarMonth; });
+  $('#close-day-detail').addEventListener('click', () => { detailOpen = false; render(); $(`[data-calendar-date="${selected}"]`)?.focus({ preventScroll: true }); });
+  window.addEventListener('popstate', () => switchView(location.hash.slice(1), { history: false }));
   $('#export-button').addEventListener('click', exportDiary);
   $('#import-input').addEventListener('change', importDiary);
   document.addEventListener('click', event => {
     const b = event.target.closest('button'); if (!b) return;
-    if (b.dataset.date) setDate(b.dataset.date);
-    if (b.dataset.historyDate) { selected = b.dataset.historyDate; switchView('diary'); }
-    if (b.dataset.calendarDate) { selected = b.dataset.calendarDate; $('#calendar-dialog').close(); switchView('diary'); }
-    if (b.hasAttribute('data-new-meal')) openMeal();
+    if (b.dataset.date) { setDate(b.dataset.date); switchView('diary'); }
+    if (b.dataset.historyDate) { setDate(b.dataset.historyDate); switchView('diary'); }
+    if (b.dataset.calendarDate) { setDate(b.dataset.calendarDate); showDayDetail(); }
+    if (b.hasAttribute('data-new-meal')) openRecord();
     if (b.dataset.edit) openMeal(selectedDay().meals.find(m => m.id === b.dataset.edit));
     if (b.dataset.confirm) {
       const day = selectedDay(), meal = day.meals.find(m => m.id === b.dataset.confirm);
@@ -219,9 +294,11 @@ async function init() {
     if (responses.some(r => !r.ok)) throw new Error('数据文件读取失败');
     canonical = validateDiary(await responses[0].json()); catalog = await responses[1].json();
     try { const saved = localStorage.getItem(storageKey); if (saved) drafts = validateDiary(JSON.parse(saved)).days; } catch { toast('已有本机草稿无法读取，请导出原备份后重新导入。'); }
-    days = mergeDays(canonical.days, drafts); selected = days.at(-1)?.date ?? today();
+    days = mergeDays(canonical.days, drafts); selected = today();
     wire(); render();
-    setupQuickEntry({ apply: applyQuickEntry, undo: undoQuickEntry });
-  } catch (error) { $('#meal-list').innerHTML = `<div class="empty-state"><h3>日记暂时没有打开</h3><p>${esc(error.message)}，请刷新重试。</p></div>`; }
+    quickController = setupQuickEntry({ apply: applyQuickEntry, undo: undoQuickEntry, onBusy: busy => document.querySelectorAll('[data-record-method]').forEach(button => { button.disabled = busy; }) });
+    prepareMealForm(); setRecordMethod('natural');
+    switchView(location.hash.slice(1) || 'diary', { history: false });
+  } catch (error) { $('#day-detail').hidden = false; $('#meal-list').innerHTML = `<div class="empty-state"><h3>日记暂时没有打开</h3><p>${esc(error.message)}，请刷新重试。</p></div>`; }
 }
 init();

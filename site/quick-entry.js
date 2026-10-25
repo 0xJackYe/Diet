@@ -28,7 +28,7 @@ function speechErrorMessage(code) {
 
 function recordedSummary(days) {
   const meals = days.flatMap(day => day.meals.map(meal => `${day.date.slice(5).replace('-', '月')}日${MEAL_LABELS[meal.type] ?? ''}`));
-  return `已填入${[...new Set(meals)].join('、')}，可以在下面的餐食卡片里查看和修改。`;
+  return `已填入${[...new Set(meals)].join('、')}。点击“查看记录的日期”即可查看和修改，也可以继续记录。`;
 }
 
 /** Connect the natural-language form to the journal's existing storage and rendering. */
@@ -59,6 +59,7 @@ export function setupQuickEntry({ apply, undo, onBusy } = {}) {
   let lastRequest = null;
   let undoToken = null;
   let undoInput = null;
+  let navigationCancelled = false;
 
   date.value = today();
   if (!Recognition) hint.textContent = '当前浏览器不支持直接口述。可以直接打字，或用手机键盘上的语音输入。';
@@ -192,6 +193,7 @@ export function setupQuickEntry({ apply, undo, onBusy } = {}) {
     if (!lastRequest || lastRequest.fingerprint !== fingerprint) lastRequest = { fingerprint, id: requestId() };
     const id = lastRequest.id;
     busy = true;
+    navigationCancelled = false;
     updateControls();
     setStatus('正在整理餐次、食材与大概热量，稍等片刻…', 'busy');
     const controller = new AbortController();
@@ -222,7 +224,7 @@ export function setupQuickEntry({ apply, undo, onBusy } = {}) {
       invalidateRequest();
       setStatus([recordedSummary(result.days), ...warnings].join('\n'), warnings.length ? 'warning' : 'success');
     } catch (error) {
-      setStatus(error.name === 'AbortError' ? '这次整理等得有点久，文字已保留，可以重新点“整理并记录”。' : error.message || '暂时无法整理，文字已保留，请稍后重试。', 'error');
+      setStatus(error.name === 'AbortError' ? navigationCancelled ? '已取消整理，输入的文字已保留。' : '这次整理等得有点久，文字已保留，可以重新点“整理并记录”。' : error.message || '暂时无法整理，文字已保留，请稍后重试。', navigationCancelled ? '' : 'error');
     } finally {
       clearTimeout(timeout);
       activeRequest = null;
@@ -256,18 +258,20 @@ export function setupQuickEntry({ apply, undo, onBusy } = {}) {
     }
   });
 
-  window.addEventListener('pagehide', () => {
-    activeRequest?.abort();
+  function cancel() {
+    if (activeRequest) { navigationCancelled = true; activeRequest.abort(); }
     if (activeRecognition) {
       const recognition = activeRecognition;
       activeRecognition = null;
       speechState = 'idle';
       try { recognition.abort(); } catch { /* The browser may have already disconnected. */ }
+      setStatus('口述已结束，输入的文字已保留。');
       updateControls();
     }
-  });
+  }
+  window.addEventListener('pagehide', cancel);
 
   updateCount();
   updateControls();
-  return { focus: () => text.focus() };
+  return { focus: () => text.focus(), cancel };
 }
